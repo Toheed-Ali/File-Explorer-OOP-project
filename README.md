@@ -3,11 +3,11 @@ A Virtual File Explorer lets users manage files and folders through a console-ba
 
 # 🗂️ Virtual File Explorer
 
-A console-based Virtual File Explorer built using Object-Oriented Programming (OOP) principles in C++. This project simulates basic file system operations with support for folders, `.txt`, and `.cpp` files. Designed using clean architecture and proper class relationships such as inheritance, composition, aggregation, and association
+A console-based Virtual File Explorer built using Object-Oriented Programming (OOP) principles in C++. This project simulates basic file system operations with support for folders, `.txt`, and `.cpp` files. Designed using clean architecture and proper class relationships such as inheritance, composition, aggregation, and association.
 
 # Features
 
-### 1. Supported File Types
+### 1. Supported File Types:
 The application supports the following:
 - 📁 Folders
 - 📄 `.txt` files
