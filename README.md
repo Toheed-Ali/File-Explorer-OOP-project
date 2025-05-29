@@ -7,7 +7,7 @@ A console-based Virtual File Explorer built using Object-Oriented Programming (O
 
 # Features
 
-### 1. Supported File Types:
+### 1. Supported File Types
 The application supports the following:
 - 📁 Folders
 - 📄 `.txt` files
