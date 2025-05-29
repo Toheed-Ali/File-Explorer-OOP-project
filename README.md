@@ -79,7 +79,7 @@ root\Users\User\source
 
 ---
 ## UML Diagram
-![UML](https://github.com/Toheed-Ali/File-Explorer-OOP-project-2025/blob/main/File%20Explorer%20UML%20Diagram.png)
+![UML](https://github.com/Toheed-Ali/File-Explorer-OOP-project-2025/blob/main/File%20Explorer%20%20UML%20Diagram.png)
 ---
 ## Flowchart/Activity Diagram
 ![Flowchart](https://github.com/Toheed-Ali/File-Explorer-OOP-project-2025/blob/main/Flowchart-Activity%20Diagram.png)
