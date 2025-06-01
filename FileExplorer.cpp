@@ -86,6 +86,14 @@ public:
     string getContent() const { return content; }
     void setContent(const string& newContent) { content = newContent; }
     
+    void display() const override {
+        cout << "📄 " << name << extension << endl;
+    }
     
+    void viewContent() const {
+        cout << "\n===== Content of " << name << extension << " =====\n";
+        cout << content << endl;
+        cout << "===== End of file =====\n\n";
+    }
 };
 
