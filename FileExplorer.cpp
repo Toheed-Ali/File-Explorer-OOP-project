@@ -71,5 +71,21 @@ public:
     string getPath() const { return path; }
 };
 
+class File : public FileSystemObject {
+protected:
+    string extension;
+    string content;
 
+public:
+    File(const string& name, const string& path, const string& extension)
+        : FileSystemObject(name, path), extension(extension), content("") {}
+    
+    ~File() {}
+    
+    string getExtension() const { return extension; }
+    string getContent() const { return content; }
+    void setContent(const string& newContent) { content = newContent; }
+    
+    
+};
 
