@@ -136,10 +136,20 @@ private:
     FileSystemObject* copyBuffer;
 
 public:
-    FileExplorer() {
+    FileExplorer() 
+    {
         // Create root directory
         rootDirectory = new Directory("root", "");
         currentDirectory = rootDirectory;
         copyBuffer = nullptr;
+    }
+
+    ~FileExplorer()
+    {
+        delete rootDirectory;  // This will recursively delete all contents
+        if (copyBuffer) 
+        {
+            delete copyBuffer;
+        }
     }
 };
