@@ -127,3 +127,19 @@ private:
 public:
     FileEditor(File* file) : file(file) {}
 };
+
+// Main class for file explorer functionality
+class FileExplorer {
+private:
+    Directory* rootDirectory;
+    Directory* currentDirectory;
+    FileSystemObject* copyBuffer;
+
+public:
+    FileExplorer() {
+        // Create root directory
+        rootDirectory = new Directory("root", "");
+        currentDirectory = rootDirectory;
+        copyBuffer = nullptr;
+    }
+};
