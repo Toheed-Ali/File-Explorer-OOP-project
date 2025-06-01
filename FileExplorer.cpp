@@ -53,3 +53,23 @@ vector<string> splitString(const string& str, char delimiter)
     }
     return tokens;
 }
+
+// Abstract base class for all file system objects
+class FileSystemObject 
+{
+protected:
+    string name;
+    string path;
+
+public:
+    FileSystemObject(const string& name, const string& path) 
+        : name(name), path(path) {}
+    
+    virtual ~FileSystemObject() {}
+    
+    string getName() const { return name; }
+    string getPath() const { return path; }
+};
+
+
+
