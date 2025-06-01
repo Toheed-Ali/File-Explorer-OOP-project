@@ -121,3 +121,9 @@ public:
     }
 };
 
+class FileEditor {
+private:
+    File* file;
+public:
+    FileEditor(File* file) : file(file) {}
+};
