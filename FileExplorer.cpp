@@ -62,23 +62,28 @@ protected:
     string path;
 
 public:
-    FileSystemObject(const string& name, const string& path) 
-        : name(name), path(path) {}
+    FileSystemObject(const string& name, const string& path) : name(name), path(path) {}
     
     virtual ~FileSystemObject() {}
     
-    string getName() const { return name; }
-    string getPath() const { return path; }
+    string getName() const 
+    { 
+        return name; 
+    }
+    string getPath() const 
+    { 
+        return path; 
+    }
 };
 
-class File : public FileSystemObject {
+class File : public FileSystemObject
+{
 protected:
     string extension;
     string content;
 
 public:
-    File(const string& name, const string& path, const string& extension)
-        : FileSystemObject(name, path), extension(extension), content("") {}
+    File(const string& name, const string& path, const string& extension) : FileSystemObject(name, path), extension(extension), content("") {}
     
     ~File() {}
     
@@ -98,17 +103,18 @@ public:
 };
 
 // Directory class representing directories in the file system
-class Directory : public FileSystemObject {
+class Directory : public FileSystemObject 
+{
 private:
     vector<FileSystemObject*> contents;
 
 public:
-    Directory(const string& name, const string& path)
-        : FileSystemObject(name, path) {}
+    Directory(const string& name, const string& path) : FileSystemObject(name, path) {}
     
     ~Directory() {
         // Clean up all contained objects
-        for (size_t i = 0; i < contents.size(); ++i) {
+        for (size_t i = 0; i < contents.size(); ++i)
+        {
             delete contents[i];
         }
         contents.clear();
