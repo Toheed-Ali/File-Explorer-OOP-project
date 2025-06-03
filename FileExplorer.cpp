@@ -83,6 +83,15 @@ public:
     { 
         path = newPath; 
     }
+    
+    string getFullPath() const 
+    {
+        if (path.empty() || path == "\\") 
+        {
+            return path + name;
+        }
+        return path + "\\" + name;
+    }
 };
 
 class File : public FileSystemObject
