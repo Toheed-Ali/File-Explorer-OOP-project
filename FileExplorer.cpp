@@ -102,7 +102,11 @@ public:
     // Pure virtual method to determine if it's a directory
     virtual bool isDirectory() const = 0;
     
+    // Pure virtual method to save content
+    virtual void saveToFile() const = 0;
     
+    // Pure virtual method to get size
+    virtual size_t getSize() const = 0;
 
 };
 
