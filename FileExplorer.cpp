@@ -134,7 +134,6 @@ private:
     Directory* rootDirectory;
     Directory* currentDirectory;
     FileSystemObject* copyBuffer;
-
 public:
     FileExplorer() 
     {
@@ -143,7 +142,6 @@ public:
         currentDirectory = rootDirectory;
         copyBuffer = nullptr;
     }
-
     ~FileExplorer()
     {
         delete rootDirectory;  // This will recursively delete all contents
