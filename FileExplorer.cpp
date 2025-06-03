@@ -92,6 +92,18 @@ public:
         }
         return path + "\\" + name;
     }
+    
+    // Pure virtual method to be implemented by derived classes
+    virtual void display() const = 0;
+    
+    // Pure virtual method for copying
+    virtual FileSystemObject* clone() const = 0;
+    
+    // Pure virtual method to determine if it's a directory
+    virtual bool isDirectory() const = 0;
+    
+    
+
 };
 
 class File : public FileSystemObject
