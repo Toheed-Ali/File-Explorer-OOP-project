@@ -74,6 +74,15 @@ public:
     { 
         return path; 
     }
+    
+    void setName(const string& newName) 
+    { 
+        name = newName; 
+    }
+    void setPath(const string& newPath) 
+    { 
+        path = newPath; 
+    }
 };
 
 class File : public FileSystemObject
