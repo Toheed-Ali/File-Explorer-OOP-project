@@ -143,6 +143,8 @@ public:
         return copy;
     }
     
+    bool isDirectory() const override { return false; }
+    
     
 };
 
