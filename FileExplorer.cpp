@@ -110,41 +110,34 @@ public:
 
 };
 
-class File : public FileSystemObject
+// File class representing files in the file system
+class File : public FileSystemObject 
 {
 protected:
     string extension;
     string content;
 
 public:
-    File(const string& name, const string& path, const string& extension) : FileSystemObject(name, path), extension(extension), content("") {}
+    File(const string& name, const string& path, const string& extension)
+        : FileSystemObject(name, path), extension(extension), content("") {}
     
     ~File() {}
     
-    string getExtension() const 
-    { 
-        return extension; 
-    }
-    string getContent() const 
-    { 
-        return content; 
-    }
-    void setContent(const string& newContent) 
-    { 
-        content = newContent; 
-    }
+    string getExtension() const { return extension; }
+    string getContent() const { return content; }
+    void setContent(const string& newContent) { content = newContent; }
     
-    void display() const override 
-    {
+    void display() const override {
         cout << "📄 " << name << extension << endl;
     }
     
-    void viewContent() const 
-    {
+    void viewContent() const {
         cout << "\n===== Content of " << name << extension << " =====\n";
         cout << content << endl;
         cout << "===== End of file =====\n\n";
     }
+    
+    
 };
 
 // Directory class representing directories in the file system
