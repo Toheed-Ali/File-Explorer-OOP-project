@@ -123,40 +123,60 @@ public:
     
     ~File() {}
     
-    string getExtension() const { return extension; }
-    string getContent() const { return content; }
-    void setContent(const string& newContent) { content = newContent; }
+    string getExtension() const 
+    { 
+        return extension;
+    }
+    string getContent() const 
+    {
+        return content;
+    }
+    void setContent(const string& newContent) 
+    {
+        content = newContent;
+    }
     
-    void display() const override {
+    void display() const override 
+    {
         cout << "📄 " << name << extension << endl;
     }
     
-    void viewContent() const {
+    void viewContent() const 
+    {
         cout << "\n===== Content of " << name << extension << " =====\n";
         cout << content << endl;
         cout << "===== End of file =====\n\n";
     }
     
-    FileSystemObject* clone() const override {
+    FileSystemObject* clone() const override 
+    {
         File* copy = new File(name, path, extension);
         copy->setContent(content);
         return copy;
     }
     
-    bool isDirectory() const override { return false; }
+    bool isDirectory() const override 
+    { 
+        return false; 
+    }
     
-    void saveToFile() const override {
+    void saveToFile() const override 
+    {
         string fullPath = getFullPath() + extension;
         ofstream file(fullPath.c_str());
-        if (file.is_open()) {
+        if (file.is_open()) 
+        {
             file << content;
             file.close();
-        } else {
+        } 
+        else 
+        {
             cout << "Error: Could not save file " << fullPath << endl;
         }
     }
     
-    size_t getSize() const override {
+    size_t getSize() const override 
+    {
         return content.size();
     }
 };
