@@ -152,7 +152,7 @@ public:
             file << content;
             file.close();
         } else {
-            cerr << "Error: Could not save file " << fullPath << endl;
+            cout << "Error: Could not save file " << fullPath << endl;
         }
     }
     
