@@ -145,6 +145,17 @@ public:
     
     bool isDirectory() const override { return false; }
     
+    void saveToFile() const override {
+        string fullPath = getFullPath() + extension;
+        ofstream file(fullPath.c_str());
+        if (file.is_open()) {
+            file << content;
+            file.close();
+        } else {
+            cerr << "Error: Could not save file " << fullPath << endl;
+        }
+    }
+    
     
 };
 
