@@ -137,6 +137,12 @@ public:
         cout << "===== End of file =====\n\n";
     }
     
+    FileSystemObject* clone() const override {
+        File* copy = new File(name, path, extension);
+        copy->setContent(content);
+        return copy;
+    }
+    
     
 };
 
