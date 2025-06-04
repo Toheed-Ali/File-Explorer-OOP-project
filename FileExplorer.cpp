@@ -156,7 +156,9 @@ public:
         }
     }
     
-    
+    size_t getSize() const override {
+        return content.size();
+    }
 };
 
 // Directory class representing directories in the file system
