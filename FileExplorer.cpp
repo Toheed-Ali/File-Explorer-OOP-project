@@ -187,7 +187,17 @@ class FileFactory
 public:
     static File* createFile(const string& name, const string& path, const string& fullName) 
     {
-        
+        size_t dotPos = fullName.find_last_of('.');
+        if (dotPos != string::npos) 
+        {
+            string ext = fullName.substr(dotPos);
+            if (ext == ".txt" || ext == ".cpp") 
+            {
+                return new File(name, path, ext);
+            }
+        }
+        // Default to txt if no extension or unsupported extension
+        return new File(name, path, ".txt");
     }
 };
 
