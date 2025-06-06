@@ -185,7 +185,10 @@ public:
 class FileFactory 
 {
 public:
-    
+    static File* createFile(const string& name, const string& path, const string& fullName) 
+    {
+        
+    }
 };
 
 
