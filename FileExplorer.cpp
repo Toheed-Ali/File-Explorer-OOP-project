@@ -181,6 +181,14 @@ public:
     }
 };
 
+// Factory for creating file objects
+class FileFactory 
+{
+public:
+    
+};
+
+
 // Directory class representing directories in the file system
 class Directory : public FileSystemObject 
 {
