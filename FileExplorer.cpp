@@ -113,7 +113,7 @@ public:
     {
         return extension;
     }
-    string getContent() const \
+    string getContent() const
     {
         return content;
     }
