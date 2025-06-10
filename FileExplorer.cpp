@@ -85,7 +85,7 @@ public:
     {
         if (path.empty() || path == "\\") 
         {
-            return path + name;
+            return name;
         }
         return path + "\\" + name;
     }
