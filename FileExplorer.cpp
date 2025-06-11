@@ -290,7 +290,7 @@ private:
 
     string readMultilineInput() 
     {
-        string content;
+        string NewContent;
         string line;
         cout << "Enter file content (type :w or :save to save, :q or :quit to quit, :q! or :quit! to quit without saving):\n";
         
@@ -299,7 +299,7 @@ private:
             getline(cin, line);
             if (line == ":w" || line == ":save") 
             {
-                return content; // Return new content
+                return NewContent; // Return new content
             } 
             else if (line == ":q" || line == ":quit")
             {
@@ -309,7 +309,7 @@ private:
                 cin.ignore();  // Clear the newline
                 if (choice == 'y' || choice == 'Y') 
                 {
-                    return content; // Return new content
+                    return NewContent; // Return new content
                 } 
                 else 
                 {
@@ -322,7 +322,7 @@ private:
             }
             else
             {
-                content += line + "\n";
+                NewContent += line + "\n";
             }
         }
     }
