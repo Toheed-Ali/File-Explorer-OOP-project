@@ -282,11 +282,76 @@ public:
     }
 };
 
-class FileEditor {
+// File editor for editing file content
+class FileEditor 
+{
 private:
     File* file;
+
+    string readMultilineInput() 
+    {
+        string content;
+        string line;
+        cout << "Enter file content (type :w or :save to save, :q or :quit to quit, :q! or :quit! to quit without saving):\n";
+        
+        while (true) 
+        {
+            getline(cin, line);
+            if (line == ":w" || line == ":save") 
+            {
+                return content; // Return new content
+            } 
+            else if (line == ":q" || line == ":quit")
+            {
+                cout << "Save changes? (y/n): ";
+                char choice;
+                cin >> choice;
+                cin.ignore();  // Clear the newline
+                if (choice == 'y' || choice == 'Y') 
+                {
+                    return content; // Return new content
+                } 
+                else 
+                {
+                    return file->getContent();  // Return original content
+                }
+            } 
+            else if (line == ":q!" || line == ":quit!") 
+            {
+                return file->getContent();  // Return original content without saving
+            }
+            else
+            {
+                content += line + "\n";
+            }
+        }
+    }
+
 public:
     FileEditor(File* file) : file(file) {}
+    
+    void editContent() 
+    {
+        cout << "\n===== Editing " << file->getName() << file->getExtension() << " =====\n";
+        cout << "Current content:\n";
+        cout << file->getContent() << endl;
+        
+        string newContent = readMultilineInput();
+        saveChanges(newContent);
+    }
+    
+    void saveChanges(const string& newContent) 
+    {
+        if (newContent != file->getContent()) 
+        {
+            file->setContent(newContent);
+            cout << "Changes saved." << endl;
+        } 
+        else 
+        {
+            cout << "No changes made." << endl;
+        }
+    }
 };
 
 // Main class for file explorer functionality
