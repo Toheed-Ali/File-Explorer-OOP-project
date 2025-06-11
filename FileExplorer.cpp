@@ -330,16 +330,6 @@ private:
 public:
     FileEditor(File* file) : file(file) {}
     
-    void editContent() 
-    {
-        cout << "\n===== Editing " << file->getName() << file->getExtension() << " =====\n";
-        cout << "Current content:\n";
-        cout << file->getContent() << endl;
-        
-        string newContent = readMultilineInput();
-        saveChanges(newContent);
-    }
-    
     void saveChanges(const string& newContent) 
     {
         if (newContent != file->getContent()) 
@@ -351,6 +341,15 @@ public:
         {
             cout << "No changes made." << endl;
         }
+    }
+    void editContent() 
+    {
+        cout << "\n===== Editing " << file->getName() << file->getExtension() << " =====\n";
+        cout << "Current content:\n";
+        cout << file->getContent() << endl;
+        
+        string newContent = readMultilineInput();
+        saveChanges(newContent);
     }
 };
 
