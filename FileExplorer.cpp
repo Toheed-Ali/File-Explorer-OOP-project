@@ -294,13 +294,13 @@ private:
         string line;
         cout << "Enter file content (type :w or :save to save, :q or :quit to quit, :q! or :quit! to quit without saving):\n";
         
-        while (true) 
+        while (true)
         {
             getline(cin, line);
             if (line == ":w" || line == ":save") 
             {
                 return NewContent; // Return new content
-            } 
+            }
             else if (line == ":q" || line == ":quit")
             {
                 cout << "Save changes? (y/n): ";
@@ -313,12 +313,12 @@ private:
                 } 
                 else 
                 {
-                    return file->getContent();  // Return original content
+                    return file->getContent(); // Return original content
                 }
-            } 
+            }
             else if (line == ":q!" || line == ":quit!") 
             {
-                return file->getContent();  // Return original content without saving
+                return file->getContent(); // Return original content without saving
             }
             else
             {
@@ -326,21 +326,12 @@ private:
             }
         }
     }
-
 public:
     FileEditor(File* file) : file(file) {}
     
-    void saveChanges(const string& newContent) 
+    void saveChanges(const string& NewContent) 
     {
-        if (newContent != file->getContent()) 
-        {
-            file->setContent(newContent);
-            cout << "Changes saved." << endl;
-        } 
-        else 
-        {
-            cout << "No changes made." << endl;
-        }
+        file->setContent(NewContent);
     }
     void editContent() 
     {
@@ -367,6 +358,7 @@ public:
         currentDirectory = rootDirectory;
         copyBuffer = nullptr;
     }
+    
     ~FileExplorer()
     {
         delete rootDirectory;  // This will recursively delete all contents
@@ -376,3 +368,12 @@ public:
         }
     }
 };
+
+// Command handler for processing user commands
+class CommandHandler 
+{
+private:
+    FileExplorer& explorer;
+    bool running;
+public:
+}
