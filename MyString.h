@@ -160,7 +160,6 @@ public:
 		strncpy(newData, data, pos);
 		strcpy(newData + pos, str.data);
 		strcpy(newData + pos + str.size, data + pos + len);
-
 		delete[] data;
 		data = newData;
 		size = size - len + str.size;
@@ -169,11 +168,6 @@ public:
 	const char* c_str() const
 	{
 		return data;
-	}
-
-	string toStdString() const
-	{
-		return string(data);
 	}
 
 	char operator[](int index) const
@@ -190,7 +184,6 @@ public:
 	}
 };
 
-// Utility functions remain same
 string trimString(const string& str)
 {
 	size_t first = 0;
