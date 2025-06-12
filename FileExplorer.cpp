@@ -1,10 +1,9 @@
 #include <iostream>
-#include <string>
-#include <vector>
 #include <fstream>
+#include "MyString.h"
+#include <vector>
 using namespace std;
 
-// Forward declarations of classes that will be used
 class FileSystemObject;
 class File;
 class Directory;
@@ -16,37 +15,44 @@ class FileEditor;
 class FileSystemObject
 {
 protected:
-    string name;
-    string path;
+    MyString name;
+    MyString path;
+
 public:
-    FileSystemObject(const string& name, const string& path) : name(name), path(path) {}
-    
+    FileSystemObject(const MyString& name, const MyString& path) : name(name), path(path) {}
+
     virtual ~FileSystemObject() {}
-    
-    string getName() const 
-    { 
+
+    MyString getName() const
+    {
         return name;
     }
-    string getPath() const 
-    { 
-        return path; 
+
+    MyString getPath() const
+    {
+        return path;
     }
-    void setName(const string& newName) 
-    { 
+
+    void setName(const MyString& newName)
+    {
         name = newName;
     }
-    void setPath(const string& newPath) 
-    { 
+
+    void setPath(const MyString& newPath)
+    {
         path = newPath;
     }
-    string getFullPath() const 
+
+    MyString getFullPath() const
     {
-        if (path.empty() || path == "\\") 
+        if (path.empty() || path == "\\")
         {
             return name;
         }
+
         return path + "\\" + name;
     }
+
     virtual void display() const = 0;
     virtual FileSystemObject* clone() const = 0;
     virtual bool isDirectory() const = 0;
@@ -54,55 +60,65 @@ public:
 };
 
 // File class representing files in the file system
-class File : public FileSystemObject 
+class File : public FileSystemObject
 {
 private:
-    string extension;
-    string content;
+    MyString extension;
+    MyString content;
+
 public:
-    File(const string& name, const string& path, const string& extension) : FileSystemObject(name, path), extension(extension), content("") {}
-    
+    File(const MyString& name, const MyString& path, const MyString& extension)
+        : FileSystemObject(name, path), extension(extension), content("") {}
+
     ~File() override {}
-    
-    string getExtension() const 
+
+    MyString getExtension() const
     {
         return extension;
     }
-    string getContent() const
+
+    MyString getContent() const
     {
         return content;
     }
-    void setContent(const string& newContent) 
+
+    void setContent(const MyString& newContent)
     {
         content = newContent;
     }
-    void display() const override 
+
+    void display() const override
     {
         cout << "📄  " << name << extension << endl;
     }
-    void viewContent() const 
+
+    void viewContent() const
     {
         cout << "\n===== Content of " << name << extension << " =====\n";
         cout << content << endl;
         cout << "=========== End of file ===========" << endl << endl;
     }
-    FileSystemObject* clone() const override 
+
+    FileSystemObject* clone() const override
     {
         File* copy = new File(name, path, extension);
         copy->setContent(content);
         return copy;
     }
-    bool isDirectory() const override 
+
+    bool isDirectory() const override
     {
         return false;
     }
-    void saveContentToFile() const override 
+
+    void saveContentToFile() const override
     {
-        string fullPath = getFullPath() + extension;
-        ofstream file(fullPath);
-        if (file.is_open()) 
+        MyString fullPath = getFullPath() + extension;
+
+        ofstream file(fullPath.toStdString());
+        if (file.is_open())
         {
-            file << content;
+            file << content.toStdString();
             file.close();
         }
         else
@@ -113,71 +129,72 @@ public:
 };
 
 // Factory for creating file objects
-class FileFactory 
+class FileFactory
 {
 public:
-    static File* createFile(const string& name, const string& path, const string& fullName) 
+    static File* createFile(const MyString& name, const MyString& path, const MyString& fullName)
     {
         int dotPos = -1;
-        // Loop through the fullName from end to start to find the last dot manually
-        for (int i = fullName.length() - 1; i >= 0; i--) 
+
+        for (int i = fullName.length() - 1; i >= 0; i--)
         {
-            if (fullName[i] == '.') 
+            if (fullName[i] == '.')
             {
                 dotPos = i;
                 break;
             }
         }
-        // If a dot was found (dotPos changed from -1)
-        if (dotPos != -1) 
+
+        if (dotPos != -1)
         {
-            string ext = fullName.substr(dotPos);
+            MyString ext = fullName.substring(dotPos, fullName.length() - dotPos);
             if (ext == ".txt" || ext == ".cpp")
             {
                 return new File(name, path, ext);
             }
         }
-        // Default to .txt if no valid extension
+
         return new File(name, path, ".txt");
     }
 };
 
 // Directory class representing directories in the file system
-class Directory : public FileSystemObject 
+class Directory : public FileSystemObject
 {
 private:
     vector<FileSystemObject*> contents;
     Directory* parent;
 
 public:
-    Directory(const string& name, const string& path, Directory* parent = nullptr) : FileSystemObject(name, path), parent(parent) {}
+    Directory(const MyString& name, const MyString& path, Directory* parent = nullptr)
+        : FileSystemObject(name, path), parent(parent) {}
 
     ~Directory() override
     {
-        for (int i = 0; i < contents.size(); i++) 
+        for (int i = 0; i < contents.size(); i++)
         {
             delete contents[i];
         }
         contents.clear();
     }
-    
-    Directory* getParent() const 
+
+    Directory* getParent() const
     {
         return parent;
     }
-    
-    void addItem(FileSystemObject* item) 
+
+    void addItem(FileSystemObject* item)
     {
-        string newPath = this->getFullPath();
+        MyString newPath = this->getFullPath();
         item->setPath(newPath);
         contents.push_back(item);
     }
-    
-    bool removeItem(const string& itemName) 
+
+    bool removeItem(const MyString& itemName)
     {
-        for (size_t i = 0; i < contents.size(); i++) 
+        for (int i = 0; i < contents.size(); i++)
         {
-            if (contents[i]->getName() == itemName) 
+            if (contents[i]->getName() == itemName)
             {
                 delete contents[i];
                 contents.erase(contents.begin() + i);
@@ -186,46 +203,60 @@ public:
         }
         return false;
     }
-    
-    const vector<FileSystemObject*>& getItems() const 
+
+    const vector<FileSystemObject*>& getItems() const
     {
         return contents;
     }
-    
-    FileSystemObject* findItem(const string& itemName) const 
+
+    FileSystemObject* findItem(const MyString& itemName) const
     {
-        for (size_t i = 0; i < contents.size(); i++) 
+        for (int i = 0; i < contents.size(); i++)
         {
-            if (contents[i]->getName() == itemName) 
+            if (contents[i]->getName() == itemName)
             {
                 return contents[i];
             }
         }
-        
-        for (size_t i = 0; i < contents.size(); i++) 
-        {
-            if (!contents[i]->isDirectory()) 
-            {
-                size_t dotPos = itemName.find_last_of('.');
-                string baseName = (dotPos != string::npos) ? itemName.substr(0, dotPos) : itemName;
 
-                if (contents[i]->getName() == baseName) 
+        for (int i = 0; i < contents.size(); i++)
+        {
+            if (!contents[i]->isDirectory())
+            {
+                int dotPos = -1;
+                for (int j = itemName.length() - 1; j >= 0; j--)
+                {
+                    if (itemName[j] == '.')
+                    {
+                        dotPos = j;
+                        break;
+                    }
+                }
+                MyString baseName;
+                if (dotPos != -1)
+                {
+                    baseName = itemName.substring(0, dotPos);
+                }
+                else
+                {
+                    baseName = itemName;
+                }
+                if (contents[i]->getName() == baseName)
                 {
                     return contents[i];
                 }
             }
         }
-        
         return nullptr;
     }
-    
-    void displayContents() const 
+
+    void displayContents() const
     {
-        cout << "\nCurrent path: " << getFullPath() << endl;
+        cout << "\nCurrent path: " << getFullPath().c_str() << endl;
         cout << "\nFiles and folders are:\n";
-        
+
         int index = 1;
-        for (size_t i = 0; i < contents.size(); i++) 
+        for (int i = 0; i < contents.size(); i++)
         {
             cout << index << ". ";
             index++;
@@ -233,50 +264,50 @@ public:
         }
         cout << endl;
     }
-    
-    void display() const override 
+
+    void display() const override
     {
-        cout << "📁  " << name << endl;
+        cout << "📁  " << name.c_str() << endl;
     }
-    
-    FileSystemObject* clone() const override 
+
+    FileSystemObject* clone() const override
     {
         Directory* copy = new Directory(name, path);
-        for (size_t i = 0; i < contents.size(); i++) 
+        for (int i = 0; i < contents.size(); i++)
         {
             copy->addItem(contents[i]->clone());
         }
         return copy;
     }
-    
-    bool isDirectory() const override 
+
+    bool isDirectory() const override
     {
         return true;
     }
-    
-    void saveContentToFile() const override 
+
+    void saveContentToFile() const override
     {
-        for (size_t i = 0; i < contents.size(); i++) 
+        for (int i = 0; i < contents.size(); i++)
         {
             contents[i]->saveContentToFile();
         }
     }
-    
-    void saveHierarchy(ofstream& file, int depth = 0) const 
+
+    void saveHierarchy(ofstream& file, int depth = 0) const
     {
         string indent(depth * 2, ' ');
-        file << indent << "📁 " << name << endl;
-        
-        for (size_t i = 0; i < contents.size(); i++)
+        file << indent << "📁 " << name.c_str() << endl;
+
+        for (int i = 0; i < contents.size(); i++)
         {
-            if (contents[i]->isDirectory()) 
+            if (contents[i]->isDirectory())
             {
                 Directory* dir = static_cast<Directory*>(contents[i]);
                 dir->saveHierarchy(file, depth + 1);
-            } 
-            else 
+            }
+            else
             {
-                file << indent << "  📄 " << contents[i]->getName() << endl;
+                file << indent << "  📄 " << contents[i]->getName().c_str() << endl;
             }
         }
     }
@@ -377,3 +408,4 @@ private:
     bool running;
 public:
 }
+
