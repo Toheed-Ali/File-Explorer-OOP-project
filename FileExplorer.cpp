@@ -409,3 +409,28 @@ private:
 public:
 }
 
+int main() 
+{
+    // Create file explorer and command handler
+    FileExplorer explorer;
+    CommandHandler commandHandler(explorer);
+    
+    // Initialize with some test data
+    explorer.initialize();
+    
+    cout << "===== Virtual File Explorer =====\n";
+
+    // Display initial directory
+    explorer.displayCurrentDirectory();
+    
+    // Main command loop
+    string commandLine;
+    while (commandHandler.isRunning()) 
+    {
+        cout << explorer.getCurrentPath() << "> ";
+        getline(cin, commandLine);
+        commandHandler.processCommand(commandLine);
+    }
+    
+    return 0;
+}
