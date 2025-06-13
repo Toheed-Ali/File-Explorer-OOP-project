@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "MyString.h"
-#include <vector>
+#include "MyVector.h"
 using namespace std;
 
 class FileSystemObject;
@@ -426,7 +426,7 @@ public:
         Desktop->addItem(textFile);
         Documents->addItem(cppFile);
         Downloads->addItem(numbersFile);
-        Pictures->addItem(picFile);
+        Documents->addItem(picFile);
     }
     
     void displayCurrentDirectory() const
