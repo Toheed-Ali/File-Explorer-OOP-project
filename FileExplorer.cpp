@@ -14,7 +14,8 @@ class FileExplorer;
 class CommandHandler;
 class FileEditor;
 
-void setConsoleColor(WORD color) {
+void setConsoleColor(WORD color) 
+{
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(hConsole, color);
 }
@@ -215,7 +216,6 @@ public:
     }
     void displayContents() const
     {
-        cout << "\nCurrent path: " << getFullPath() << endl;
         cout << "\nFiles and folders are:\n";
         int index = 1;
         for (auto item : contents)
@@ -282,7 +282,9 @@ private:
 
         while (true)
         {
+            setConsoleColor(FOREGROUND_GREEN | FOREGROUND_BLUE);
             getline(cin, line);
+            setConsoleColor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
             if (line == ":w" || line == ":save")
             {
                 return newContent;
@@ -321,9 +323,16 @@ public:
     }
     void editContent()
     {
-        cout << "\n===== Editing " << file->getName() << file->getExtension() << " =====\n";
-        cout << "Current content:\n";
+        setConsoleColor(FOREGROUND_RED);
+        cout << endl << "Editing " << file->getName() << file->getExtension() << endl;
+        setConsoleColor(FOREGROUND_RED | FOREGROUND_GREEN);
+        cout << setfill('=') << setw(50) << "" << "\n";
+        cout << setfill(' ') << setw(30) << "Current Content of " << file->getName() << file->getExtension() << "\n";
+        cout << setfill('=') << setw(50) << "" << "\n";
+
         cout << file->getContent() << endl;
+        cout << "================== End of file ===================" << endl;
+        setConsoleColor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 
         string newContent = readMultilineInput();
         saveChanges(newContent);
@@ -844,10 +853,11 @@ public:
     void processCommand(const string& commandLine)
     {
         vector<string> args = splitString(commandLine, ' ');
-        if (args.empty()) return;
-
+        if (args.empty()) 
+        {
+            return;
+        }
         string command = args[0];
-
         if (command == "cd")
         {
             handleCd(args);
@@ -902,7 +912,6 @@ public:
             explorer.displayCurrentDirectory();
         }
     }
-
     bool isRunning() const
     {
         return running;
@@ -914,15 +923,11 @@ int main()
     // for emojis in console
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);
-
     FileExplorer explorer;
     CommandHandler commandHandler(explorer);
-
     explorer.initialize();
-
     cout << "===== Virtual File Explorer =====\n";
     explorer.displayCurrentDirectory();
-
     string commandLine;
     while (commandHandler.isRunning())
     {
@@ -933,6 +938,5 @@ int main()
         setConsoleColor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
         commandHandler.processCommand(commandLine);
     }
-
     return 0;
 }
