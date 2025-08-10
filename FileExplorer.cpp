@@ -14,7 +14,7 @@ class FileExplorer;
 class CommandHandler;
 class FileEditor;
 
-void setConsoleColor(WORD color) 
+void setConsoleColor(WORD color)
 {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(hConsole, color);
@@ -853,7 +853,7 @@ public:
     void processCommand(const string& commandLine)
     {
         vector<string> args = splitString(commandLine, ' ');
-        if (args.empty()) 
+        if (args.empty())
         {
             return;
         }
@@ -902,6 +902,11 @@ public:
         {
             handleHelp(args);
         }
+        else if (command == "clear")
+        {
+            system("cls");
+            cout << "========= Virtual File Explorer =========" << endl;
+        }
         else
         {
             cout << "Unknown command: " << command << endl;
@@ -926,12 +931,12 @@ int main()
     FileExplorer explorer;
     CommandHandler commandHandler(explorer);
     explorer.initialize();
-    cout << "===== Virtual File Explorer =====\n";
+    cout << "========= Virtual File Explorer =========" << endl;
     explorer.displayCurrentDirectory();
     string commandLine;
     while (commandHandler.isRunning())
     {
-        setConsoleColor(FOREGROUND_GREEN | FOREGROUND_INTENSITY); // Light Green
+        setConsoleColor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
         cout << explorer.getCurrentPath() << "> ";
         setConsoleColor(FOREGROUND_RED);
         getline(cin, commandLine);
