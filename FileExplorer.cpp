@@ -826,6 +826,10 @@ private:
                 cout << "help - Display available commands\n";
                 cout << "help <command> - Display detailed help for a command\n";
             }
+            else if (command == "clear")
+            {
+                cout << "clear - Clear the console screen\n";
+            }
             else
             {
                 cout << "No help available for '" << command << "'\n";
@@ -842,6 +846,7 @@ private:
             cout << "  paste\n";
             cout << "  mkdir <directory_name>\n";
             cout << "  touch <file_name.extension>\n";
+            cout << "  clear\n";
             cout << "  exit\n";
             cout << "  help [command]\n";
             cout << "\nType 'help <command>' for more details on a specific command.\n";
@@ -936,7 +941,7 @@ int main()
     string commandLine;
     while (commandHandler.isRunning())
     {
-        setConsoleColor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+        setConsoleColor(FOREGROUND_GREEN | FOREGROUND_INTENSITY); // Light Green
         cout << explorer.getCurrentPath() << "> ";
         setConsoleColor(FOREGROUND_RED);
         getline(cin, commandLine);
