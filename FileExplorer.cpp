@@ -1,7 +1,10 @@
 #include <iostream>
 #include <fstream>
-#include "MyString.h"
-#include "MyVector.h"
+#include <string>
+#include <vector>
+#include <windows.h>
+#include <iomanip>
+#pragma execution_character_set("utf-8") // for emojis in console
 using namespace std;
 
 class FileSystemObject;
@@ -11,39 +14,37 @@ class FileExplorer;
 class CommandHandler;
 class FileEditor;
 
+void setConsoleColor(WORD color) {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, color);
+}
+
 // Abstract base class for all file system objects
 class FileSystemObject
 {
 protected:
-    MyString name;
-    MyString path;
-
+    string name;
+    string path;
 public:
-    FileSystemObject(const MyString& name, const MyString& path) : name(name), path(path) {}
-
+    FileSystemObject(const string& name, const string& path) : name(name), path(path) {}
     virtual ~FileSystemObject() {}
-
-    MyString getName() const
+    string getName() const
     {
         return name;
     }
-
-    MyString getPath() const
+    string getPath() const
     {
         return path;
     }
-
-    void setName(const MyString& newName)
+    void setName(const string& newName)
     {
         name = newName;
     }
-
-    void setPath(const MyString& newPath)
+    void setPath(const string& newPath)
     {
         path = newPath;
     }
-
-    MyString getFullPath() const
+    string getFullPath() const
     {
         if (path.empty() || path == "\\")
         {
@@ -51,7 +52,6 @@ public:
         }
         return path + "\\" + name;
     }
-
     virtual void display() const = 0;
     virtual FileSystemObject* clone() const = 0;
     virtual bool isDirectory() const = 0;
@@ -62,95 +62,79 @@ public:
 class File : public FileSystemObject
 {
 private:
-    MyString extension;
-    MyString content;
-
+    string extension;
+    string content;
 public:
-    File(const MyString& name, const MyString& path, const MyString& extension) : FileSystemObject(name, path), extension(extension), content("") {}
-
+    File(const string& name, const string& path, const string& extension) : FileSystemObject(name, path), extension(extension), content("") {}
     ~File() override {}
-
-    MyString getExtension() const
+    string getExtension() const
     {
         return extension;
     }
-
-    MyString getContent() const
+    string getContent() const
     {
         return content;
     }
-
-    void setContent(const MyString& newContent)
+    void setContent(const string& newContent)
     {
         content = newContent;
     }
-
     void display() const override
     {
         cout << "📄  " << name << extension << endl;
     }
-
     void viewContent() const
     {
-        cout << "\n===== Content of " << name << extension << " =====\n";
-        cout << content << endl;
-        cout << "=========== End of file ===========" << endl << endl;
-    }
+        setConsoleColor(FOREGROUND_RED | FOREGROUND_GREEN);
+        cout << setfill('=') << setw(50) << "" << "\n";
+        cout << setfill(' ') << setw(25) << "Content of " << name << extension << "\n";
+        cout << setfill('=') << setw(50) << "" << "\n";
 
+        cout << content << endl;
+        cout << "================== End of file ===================" << endl;
+        setConsoleColor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+    }
     FileSystemObject* clone() const override
     {
         File* copy = new File(name, path, extension);
         copy->setContent(content);
         return copy;
     }
-
     bool isDirectory() const override
     {
         return false;
     }
-
     void saveContentToFile() const override
-	{
-		MyString fullPath = getFullPath() + extension;
-		ofstream file(fullPath.c_str());
-		if (file.is_open())
-		{
-			file << content.c_str();
-			file.close();
-		}
-		else
-		{
-			cout << "Error: Could not save file " << fullPath.c_str() << endl;
-		}
-	}
+    {
+        string fullPath = getFullPath() + extension;
+        ofstream file(fullPath);
+        if (file.is_open())
+        {
+            file << content;
+            file.close();
+        }
+        else
+        {
+            cout << "Error: Could not save file " << fullPath << endl;
+        }
+    }
 };
 
 // Factory for creating file objects
 class FileFactory
 {
 public:
-    static File* createFile(const MyString& name, const MyString& path, const MyString& fullName)
+    static File* createFile(const string& name, const string& path, const string& fullName)
     {
-        int dotPos = -1;
-
-        for (int i = fullName.length() - 1; i >= 0; i--)
+        size_t dotPos = fullName.rfind('.');
+        if (dotPos != string::npos)
         {
-            if (fullName[i] == '.')
-            {
-                dotPos = i;
-                break;
-            }
-        }
-
-        if (dotPos != -1)
-        {
-            MyString ext = fullName.substr(dotPos, fullName.length() - dotPos);
+            string ext = fullName.substr(dotPos);
             if (ext == ".txt" || ext == ".cpp")
             {
                 return new File(name, path, ext);
             }
         }
-
         return new File(name, path, ".txt");
     }
 };
@@ -162,32 +146,28 @@ private:
     vector<FileSystemObject*> contents;
     Directory* parent;
 public:
-    Directory(const MyString& name, const MyString& path, Directory* parent = nullptr) : FileSystemObject(name, path), parent(parent) {}
-
+    Directory(const string& name, const string& path, Directory* parent = nullptr) : FileSystemObject(name, path), parent(parent) {}
     ~Directory() override
     {
-        for (int i = 0; i < contents.size(); i++)
+        for (auto item : contents)
         {
-            delete contents[i];
+            delete item;
         }
         contents.clear();
     }
-
     Directory* getParent() const
     {
         return parent;
     }
-
     void addItem(FileSystemObject* item)
     {
-        MyString newPath = this->getFullPath();
+        string newPath = this->getFullPath();
         item->setPath(newPath);
         contents.push_back(item);
     }
-
-    bool removeItem(const MyString& itemName)
+    bool removeItem(const string& itemName)
     {
-        for (int i = 0; i < contents.size(); i++)
+        for (size_t i = 0; i < contents.size(); i++)
         {
             if (contents[i]->getName() == itemName)
             {
@@ -198,37 +178,26 @@ public:
         }
         return false;
     }
-
     const vector<FileSystemObject*>& getItems() const
     {
         return contents;
     }
-
-    FileSystemObject* findItem(const MyString& itemName) const
+    FileSystemObject* findItem(const string& itemName) const
     {
-        for (int i = 0; i < contents.size(); i++)
+        for (auto item : contents)
         {
-            if (contents[i]->getName() == itemName)
+            if (item->getName() == itemName)
             {
-                return contents[i];
+                return item;
             }
         }
-
-        for (int i = 0; i < contents.size(); i++)
+        for (auto item : contents)
         {
-            if (!contents[i]->isDirectory())
+            if (!item->isDirectory())
             {
-                int dotPos = -1;
-                for (int j = itemName.length() - 1; j >= 0; j--)
-                {
-                    if (itemName[j] == '.')
-                    {
-                        dotPos = j;
-                        break;
-                    }
-                }
-                MyString baseName;
-                if (dotPos != -1)
+                size_t dotPos = itemName.rfind('.');
+                string baseName;
+                if (dotPos != string::npos)
                 {
                     baseName = itemName.substr(0, dotPos);
                 }
@@ -236,224 +205,210 @@ public:
                 {
                     baseName = itemName;
                 }
-                if (contents[i]->getName() == baseName)
+                if (item->getName() == baseName)
                 {
-                    return contents[i];
+                    return item;
                 }
             }
         }
         return nullptr;
     }
-
     void displayContents() const
     {
-        cout << "\nCurrent path: " << getFullPath().c_str() << endl;
+        cout << "\nCurrent path: " << getFullPath() << endl;
         cout << "\nFiles and folders are:\n";
-
         int index = 1;
-        for (int i = 0; i < contents.size(); i++)
+        for (auto item : contents)
         {
             cout << index << ". ";
             index++;
-            contents[i]->display();
+            item->display();
         }
         cout << endl;
     }
-
     void display() const override
     {
-        cout << "📁  " << name.c_str() << endl;
+        cout << "📁  " << name << endl;
     }
-
     FileSystemObject* clone() const override
     {
         Directory* copy = new Directory(name, path);
-        for (int i = 0; i < contents.size(); i++)
+        for (auto item : contents)
         {
-            copy->addItem(contents[i]->clone());
+            copy->addItem(item->clone());
         }
         return copy;
     }
-
     bool isDirectory() const override
     {
         return true;
     }
-
     void saveContentToFile() const override
     {
-        for (int i = 0; i < contents.size(); i++)
+        for (auto item : contents)
         {
-            contents[i]->saveContentToFile();
+            item->saveContentToFile();
         }
     }
-
     void saveHierarchy(ofstream& file, int depth = 0) const
     {
         string indent(depth * 2, ' ');
-        file << indent << "📁 " << name.c_str() << endl;
-
-        for (int i = 0; i < contents.size(); i++)
+        file << indent << "📁 " << name << endl;
+        for (auto item : contents)
         {
-            if (contents[i]->isDirectory())
+            if (item->isDirectory())
             {
-                Directory* dir = static_cast<Directory*>(contents[i]);
+                Directory* dir = static_cast<Directory*>(item);
                 dir->saveHierarchy(file, depth + 1);
             }
             else
             {
-                file << indent << "  📄 " << contents[i]->getName().c_str() << endl;
+                file << indent << "  📄 " << item->getName() << endl;
             }
         }
     }
 };
 
 // File editor for editing file content
-class FileEditor 
+class FileEditor
 {
 private:
     File* file;
-
-    MyString readMultilineInput() 
+    string readMultilineInput()
     {
-        MyString NewContent;
+        string newContent;
         string line;
         cout << "Enter file content (type :w or :save to save, :q or :quit to quit, :q! or :quit! to quit without saving):\n";
-        
+
         while (true)
         {
             getline(cin, line);
-            MyString inputLine(line.c_str());
-
-            if (inputLine == ":w" || inputLine == ":save") 
+            if (line == ":w" || line == ":save")
             {
-                return NewContent;
+                return newContent;
             }
-            else if (inputLine == ":q" || inputLine == ":quit")
+            else if (line == ":q" || line == ":quit")
             {
                 cout << "Save changes? (y/n): ";
                 char choice;
                 cin >> choice;
-                cin.ignore();  
-                if (choice == 'y' || choice == 'Y') 
+                cin.ignore();
+                if (choice == 'y' || choice == 'Y')
                 {
-                    return NewContent;
-                } 
-                else 
+                    return newContent;
+                }
+                else
                 {
                     return file->getContent();
                 }
             }
-            else if (inputLine == ":q!" || inputLine == ":quit!") 
+            else if (line == ":q!" || line == ":quit!")
             {
                 return file->getContent();
             }
             else
             {
-                NewContent = NewContent + inputLine + "\n";
+                newContent += line + "\n";
             }
         }
     }
-
 public:
     FileEditor(File* file) : file(file) {}
-    
-    void saveChanges(const MyString& NewContent) 
-    {
-        file->setContent(NewContent);
-    }
 
-    void editContent() 
+    void saveChanges(const string& newContent)
     {
-        cout << "\n===== Editing " << file->getName().c_str() << file->getExtension().c_str() << " =====\n";
+        file->setContent(newContent);
+    }
+    void editContent()
+    {
+        cout << "\n===== Editing " << file->getName() << file->getExtension() << " =====\n";
         cout << "Current content:\n";
-        cout << file->getContent().c_str() << endl;
-        
-        MyString newContent = readMultilineInput();
+        cout << file->getContent() << endl;
+
+        string newContent = readMultilineInput();
         saveChanges(newContent);
     }
 };
 
 // Main class for file explorer functionality
-class FileExplorer 
+class FileExplorer
 {
 private:
     Directory* rootDirectory;
     Directory* currentDirectory;
     FileSystemObject* copyBuffer;
-
 public:
-    FileExplorer() 
+    FileExplorer()
     {
-        rootDirectory = new Directory(MyString("root"), MyString(""));
+        rootDirectory = new Directory("root", "");
         currentDirectory = rootDirectory;
         copyBuffer = nullptr;
     }
-    
-    ~FileExplorer() 
+
+    ~FileExplorer()
     {
         delete rootDirectory;
-        if (copyBuffer) 
+        if (copyBuffer)
         {
             delete copyBuffer;
         }
     }
-    
+
     void initialize()
     {
-        Directory* Desktop = new Directory(MyString("Desktop"), rootDirectory->getFullPath(), rootDirectory);
-        Directory* Documents = new Directory(MyString("Documents"), rootDirectory->getFullPath(), rootDirectory);
-        Directory* Downloads = new Directory(MyString("Downloads"), rootDirectory->getFullPath(), rootDirectory);
-        Directory* Pictures = new Directory(MyString("Pictures"), rootDirectory->getFullPath(), rootDirectory);
-        
-        File* textFile = new File(MyString("name"), rootDirectory->getFullPath(), MyString(".txt"));
-        textFile->setContent(MyString("This is a sample text file."));
-        
-        File* cppFile = new File(MyString("hello"), rootDirectory->getFullPath(), MyString(".cpp"));
-        cppFile->setContent(MyString("#include <iostream>\nusing namespace std;\nint main1() \n{\n    cout << \"Hello, World!\" << endl;\n    return 0;\n}"));
-        
-        File* numbersFile = new File(MyString("numbers"), rootDirectory->getFullPath(), MyString(".txt"));
-        numbersFile->setContent(MyString("0321-4567483\n0342-4563452\n0322-1345321\n0321-2233445\n0323-2345543"));
-        
-        File* picFile = new File(MyString("vacation"), Desktop->getFullPath(), MyString(".txt"));
-        picFile->setContent(MyString("Beach photos from summer vacation"));
-        
+        Directory* Desktop = new Directory("Desktop", rootDirectory->getFullPath(), rootDirectory);
+        Directory* Documents = new Directory("Documents", rootDirectory->getFullPath(), rootDirectory);
+        Directory* Downloads = new Directory("Downloads", rootDirectory->getFullPath(), rootDirectory);
+        Directory* Pictures = new Directory("Pictures", rootDirectory->getFullPath(), rootDirectory);
+
+        File* textFile = new File("name", rootDirectory->getFullPath(), ".txt");
+        textFile->setContent("Toheed Ali\nTalha Malik\nSaad Hamid\nYousaf\nSubhan");
+
+        File* cppFile = new File("hello", rootDirectory->getFullPath(), ".cpp");
+        cppFile->setContent("#include <iostream>\nusing namespace std;\nint main1() \n{\n    cout << \"Hello, World!\" << endl;\n    return 0;\n}");
+
+        File* numbersFile = new File("numbers", rootDirectory->getFullPath(), ".txt");
+        numbersFile->setContent("0321-4567483\n0342-4563452\n0322-1345321\n0321-2233445\n0323-2345543");
+
+        File* picFile = new File("vacation", Desktop->getFullPath(), ".txt");
+        picFile->setContent("Beach photos from summer vacation");
+
         rootDirectory->addItem(Desktop);
         rootDirectory->addItem(Documents);
         rootDirectory->addItem(Downloads);
         rootDirectory->addItem(Pictures);
-        
+
         Desktop->addItem(textFile);
         Documents->addItem(cppFile);
         Downloads->addItem(numbersFile);
         Documents->addItem(picFile);
     }
-    
+
     void displayCurrentDirectory() const
     {
         currentDirectory->displayContents();
     }
-    
-    bool navigate(const MyString& dirName) 
+
+    bool navigate(const string& dirName)
     {
-        if (dirName == "..") 
+        if (dirName == "..")
         {
-            if (currentDirectory != rootDirectory && currentDirectory->getParent()) 
+            if (currentDirectory != rootDirectory && currentDirectory->getParent())
             {
                 currentDirectory = currentDirectory->getParent();
                 return true;
-            } 
-            else if (currentDirectory != rootDirectory) 
+            }
+            else if (currentDirectory != rootDirectory)
             {
                 currentDirectory = rootDirectory;
                 return true;
             }
             return false;
-        } 
-        else 
+        }
+        else
         {
             FileSystemObject* item = currentDirectory->findItem(dirName);
-            if (item && item->isDirectory()) 
+            if (item && item->isDirectory())
             {
                 currentDirectory = static_cast<Directory*>(item);
                 return true;
@@ -461,11 +416,11 @@ public:
             return false;
         }
     }
-    
-    bool viewFile(const MyString& fileName) 
+
+    bool viewFile(const string& fileName)
     {
         FileSystemObject* item = currentDirectory->findItem(fileName);
-        if (item && !item->isDirectory()) 
+        if (item && !item->isDirectory())
         {
             File* file = static_cast<File*>(item);
             file->viewContent();
@@ -473,30 +428,30 @@ public:
         }
         return false;
     }
-    
-    bool deleteItem(const MyString& itemName) 
+
+    bool deleteItem(const string& itemName)
     {
         FileSystemObject* item = currentDirectory->findItem(itemName);
-        if (!item) 
+        if (!item)
         {
-            cout << "Error: Item '" << itemName.c_str() << "' not found." << endl;
+            cout << "Error: Item '" << itemName << "' not found." << endl;
             return false;
         }
-        cout << "Are you sure you want to delete '" << itemName.c_str() << "'? (y/n): ";
+        cout << "Are you sure you want to delete '" << itemName << "'? (y/n): ";
         char choice;
         cin >> choice;
         cin.ignore();
-        if (choice == 'y' || choice == 'Y') 
+        if (choice == 'y' || choice == 'Y')
         {
             return currentDirectory->removeItem(item->getName());
         }
         return false;
     }
-    
-    bool editFile(const MyString& fileName) 
+
+    bool editFile(const string& fileName)
     {
         FileSystemObject* item = currentDirectory->findItem(fileName);
-        if (item && !item->isDirectory()) 
+        if (item && !item->isDirectory())
         {
             File* file = static_cast<File*>(item);
             FileEditor editor(file);
@@ -505,67 +460,67 @@ public:
         }
         return false;
     }
-    
-    bool copyItem(const MyString& itemName) 
+
+    bool copyItem(const string& itemName)
     {
         FileSystemObject* item = currentDirectory->findItem(itemName);
         if (item)
         {
-            if (copyBuffer) 
+            if (copyBuffer)
             {
                 delete copyBuffer;
             }
             copyBuffer = item->clone();
-            cout << "Copied: " << itemName.c_str() << endl;
+            cout << "Copied: " << itemName << endl;
             return true;
         }
         return false;
     }
-    
-    bool cutItem(const MyString& itemName) 
+
+    bool cutItem(const string& itemName)
     {
         FileSystemObject* item = currentDirectory->findItem(itemName);
         if (item)
         {
-            if (copyBuffer) 
+            if (copyBuffer)
             {
                 delete copyBuffer;
             }
             copyBuffer = item->clone();
-            cout << "Cutted: " << itemName.c_str() << endl;
+            cout << "Cut: " << itemName << endl;
             return true;
         }
         return false;
     }
-    
-    bool pasteItem() 
+
+    bool pasteItem()
     {
-        if (!copyBuffer) 
+        if (!copyBuffer)
         {
             cout << "Error: Nothing to paste." << endl;
             return false;
         }
-        MyString itemName = copyBuffer->getName();
+        string itemName = copyBuffer->getName();
         FileSystemObject* existingItem = currentDirectory->findItem(itemName);
-        
-        if (existingItem) 
+
+        if (existingItem)
         {
-            cout << "'" << itemName.c_str() << "' already exists. Overwrite? (y/n/rename): ";
+            cout << "'" << itemName << "' already exists. Overwrite? (y/n/rename): ";
             string choice;
             getline(cin, choice);
-            
-            if (choice == "y" || choice == "Y") 
+
+            if (choice == "y" || choice == "Y")
             {
                 currentDirectory->removeItem(itemName);
-            } 
+            }
             else if (choice == "rename")
             {
                 cout << "Enter new name: ";
                 string newName;
                 getline(cin, newName);
-                copyBuffer->setName(MyString(newName.c_str()));
-            } 
-            else 
+                copyBuffer->setName(newName);
+            }
+            else
             {
                 return false;
             }
@@ -575,86 +530,104 @@ public:
         currentDirectory->addItem(pastedItem);
         return true;
     }
-    
-    bool createDirectory(const MyString& dirName) 
+
+    bool createDirectory(const string& dirName)
     {
-        if (currentDirectory->findItem(dirName)) 
+        if (currentDirectory->findItem(dirName))
         {
-            cout << "Error: An item named '" << dirName.c_str() << "' already exists." << endl;
+            cout << "Error: An item named '" << dirName << "' already exists." << endl;
             return false;
         }
         Directory* newDir = new Directory(dirName, currentDirectory->getFullPath());
         currentDirectory->addItem(newDir);
-        cout << "Directory created: " << dirName.c_str() << endl;
+        cout << "Directory created: " << dirName << endl;
         return true;
     }
-    
-    bool createFile(const MyString& fileName) 
-    {
-        MyString baseName = fileName;
-        MyString extension = ".txt";
 
-        int dotPos = fileName.lastIndexOf('.');
-        if (dotPos != -1) 
+    bool createFile(const string& fileName)
+    {
+        string baseName = fileName;
+        string extension = ".txt";
+        size_t dotPos = fileName.rfind('.');
+        if (dotPos != string::npos)
         {
             baseName = fileName.substr(0, dotPos);
-            extension = fileName.substr(dotPos, fileName.length() - dotPos);
+            extension = fileName.substr(dotPos);
         }
-
-        if (currentDirectory->findItem(baseName)) 
+        if (currentDirectory->findItem(baseName))
         {
-            cout << "Error: An item named '" << baseName.c_str() << "' already exists." << endl;
+            cout << "Error: An item named '" << baseName << "' already exists." << endl;
             return false;
         }
         File* newFile = new File(baseName, currentDirectory->getFullPath(), extension);
         currentDirectory->addItem(newFile);
-        cout << "File created: " << fileName.c_str() << endl;
+        cout << "File created: " << fileName << endl;
         return true;
     }
-    
-    void saveHierarchy() const 
+
+    void saveHierarchy() const
     {
         ofstream file("hierarchy.txt");
-        if (file.is_open()) 
+        if (file.is_open())
         {
             rootDirectory->saveHierarchy(file);
             file.close();
             cout << "Hierarchy saved to hierarchy.txt" << endl;
-        } 
-        else 
+        }
+        else
         {
             cerr << "Error: Could not save hierarchy" << endl;
         }
     }
-    
-    void saveAllFiles() const 
+
+    void saveAllFiles() const
     {
         rootDirectory->saveContentToFile();
         cout << "All files saved" << endl;
     }
-    
-    MyString getCurrentPath() const 
+
+    string getCurrentPath() const
     {
         return currentDirectory->getFullPath();
     }
 };
 
+// Helper function to split string by delimiter
+vector<string> splitString(const string& s, char delimiter) {
+    vector<string> tokens;
+    string token;
+
+    for (char c : s) {
+        if (c == delimiter)
+        {
+            tokens.push_back(token);
+            token.clear();
+        }
+        else
+        {
+            token += c;
+        }
+    }
+    tokens.push_back(token);
+    return tokens;
+}
+
 // Command handler for processing user commands
-class CommandHandler 
+class CommandHandler
 {
 private:
     FileExplorer& explorer;
     bool running;
 
     // Process cd command
-    void handleCd(const vector<string>& args) 
+    void handleCd(const vector<string>& args)
     {
         if (args.size() < 2)
         {
             cout << "Error: cd command requires a directory name" << endl;
             return;
         }
-        
+
         string target = args[1];
         if (!explorer.navigate(target))
         {
@@ -665,74 +638,74 @@ private:
             }
         }
     }
-    
+
     // Process view command
-    void handleView(const vector<string>& args) 
+    void handleView(const vector<string>& args)
     {
-        if (args.size() < 2) 
+        if (args.size() < 2)
         {
             cout << "Error: view command requires a file name" << endl;
             return;
         }
-        
+
         string fileName = args[1];
-        if (!explorer.viewFile(fileName)) 
+        if (!explorer.viewFile(fileName))
         {
             cout << "Error: Could not view file '" << fileName << "'" << endl;
         }
     }
-    
+
     // Process delete command
-    void handleDelete(const vector<string>& args) 
+    void handleDelete(const vector<string>& args)
     {
-        if (args.size() < 2) 
+        if (args.size() < 2)
         {
             cout << "Error: delete command requires an item name" << endl;
             return;
         }
-        
+
         string itemName = args[1];
-        if (!explorer.deleteItem(itemName)) 
+        if (!explorer.deleteItem(itemName))
         {
             cout << "Error: Could not delete '" << itemName << "'" << endl;
         }
     }
-    
+
     // Process edit command
-    void handleEdit(const vector<string>& args) 
+    void handleEdit(const vector<string>& args)
     {
         if (args.size() < 2)
         {
             cout << "Error: edit command requires a file name" << endl;
             return;
         }
-        
+
         string fileName = args[1];
-        if (!explorer.editFile(fileName)) 
+        if (!explorer.editFile(fileName))
         {
             cout << "Error: Could not edit file '" << fileName << "'" << endl;
         }
     }
-    
+
     // Process copy command
-    void handleCopy(const vector<string>& args) 
+    void handleCopy(const vector<string>& args)
     {
-        if (args.size() < 2) 
+        if (args.size() < 2)
         {
             cout << "Error: copy command requires an item name" << endl;
             return;
         }
-        
+
         string itemName = args[1];
         if (!explorer.copyItem(itemName))
         {
             cout << "Error: Could not copy '" << itemName << "'" << endl;
         }
     }
-    
-    void handleCut(const vector<string>& args) 
+
+    void handleCut(const vector<string>& args)
     {
-        if (args.size() < 2) 
+        if (args.size() < 2)
         {
             cout << "Error: cut command requires an item name" << endl;
             return;
@@ -742,21 +715,21 @@ private:
         {
             cout << "Error: Could not cut '" << itemName << "'" << endl;
         }
-        if (!explorer.deleteItem(itemName)) 
+        if (!explorer.deleteItem(itemName))
         {
             cout << "Error: Could not delete '" << itemName << "'" << endl;
         }
     }
-    
+
     // Process paste command
     void handlePaste(const vector<string>& args)
     {
-        if (!explorer.pasteItem()) 
+        if (!explorer.pasteItem())
         {
             cout << "Error: Paste operation failed" << endl;
         }
     }
-    
+
     // New method to process mkdir command
     void handleMkdir(const vector<string>& args)
     {
@@ -765,65 +738,65 @@ private:
             cout << "Error: mkdir command requires a directory name" << endl;
             return;
         }
-        
+
         string dirName = args[1];
         explorer.createDirectory(dirName);
     }
-    
+
     // New method to process touch command
     void handleTouch(const vector<string>& args)
     {
-        if (args.size() < 2) 
+        if (args.size() < 2)
         {
             cout << "Error: touch command requires a file name" << endl;
             return;
         }
-        
+
         string fileName = args[1];
         explorer.createFile(fileName);
     }
-    
+
     // Process exit command
-    void handleExit(const vector<string>& args) 
+    void handleExit(const vector<string>& args)
     {
         explorer.saveHierarchy();
         explorer.saveAllFiles();
         running = false;
         cout << "Exiting file explorer..." << endl;
     }
-    
+
     // Process help command
-    void handleHelp(const vector<string>& args) 
+    void handleHelp(const vector<string>& args)
     {
-        if (args.size() > 1) 
+        if (args.size() > 1)
         {
             string command = args[1];
-            if (command == "cd") 
+            if (command == "cd")
             {
                 cout << "cd <directory_name> - Navigate to a directory\n";
                 cout << "cd .. - Navigate to parent directory\n";
                 cout << "cd <file_name> - View file content\n";
-            } 
-            else if (command == "view") 
+            }
+            else if (command == "view")
             {
                 cout << "view <file_name> - Display file content\n";
-            } 
-            else if (command == "delete") 
+            }
+            else if (command == "delete")
             {
                 cout << "delete <name> - Delete a file or directory\n";
-            } 
-            else if (command == "edit") 
+            }
+            else if (command == "edit")
             {
                 cout << "edit <file_name> - Edit file content\n";
                 cout << "In editor: :w or :save - Save changes\n";
                 cout << "In editor: :q or :quit - Quit and prompt to save\n";
                 cout << "In editor: :q! - Quit without saving\n";
-            } 
+            }
             else if (command == "copy")
             {
                 cout << "copy <name> - Copy a file or directory\n";
-            } 
-            else if (command == "paste") 
+            }
+            else if (command == "paste")
             {
                 cout << "paste - Paste copied item into current directory\n";
             }
@@ -838,17 +811,17 @@ private:
             else if (command == "exit")
             {
                 cout << "exit - Save and exit the file explorer\n";
-            } 
-            else if (command == "help") 
+            }
+            else if (command == "help")
             {
                 cout << "help - Display available commands\n";
                 cout << "help <command> - Display detailed help for a command\n";
-            } 
+            }
             else
             {
                 cout << "No help available for '" << command << "'\n";
             }
-        } 
+        }
         else
         {
             cout << "\nAvailable commands:\n";
@@ -865,102 +838,101 @@ private:
             cout << "\nType 'help <command>' for more details on a specific command.\n";
         }
     }
-
 public:
     CommandHandler(FileExplorer& explorer) : explorer(explorer), running(true) {}
-    
+
     void processCommand(const string& commandLine)
     {
         vector<string> args = splitString(commandLine, ' ');
         if (args.empty()) return;
-        
+
         string command = args[0];
-        
-        if (command == "cd") 
+
+        if (command == "cd")
         {
             handleCd(args);
-        } 
-        else if (command == "view") 
+        }
+        else if (command == "view")
         {
             handleView(args);
-        } 
+        }
         else if (command == "delete")
         {
             handleDelete(args);
-        } 
-        else if (command == "edit") 
+        }
+        else if (command == "edit")
         {
             handleEdit(args);
-        } 
-        else if (command == "copy") 
+        }
+        else if (command == "copy")
         {
             handleCopy(args);
-        } 
-        else if (command == "cut") 
+        }
+        else if (command == "cut")
         {
             handleCut(args);
-        } 
-        else if (command == "paste") 
+        }
+        else if (command == "paste")
         {
             handlePaste(args);
-        } 
-        else if (command == "mkdir") 
+        }
+        else if (command == "mkdir")
         {
             handleMkdir(args);
-        } 
-        else if (command == "touch") 
+        }
+        else if (command == "touch")
         {
             handleTouch(args);
-        } 
-        else if (command == "exit") 
+        }
+        else if (command == "exit")
         {
             handleExit(args);
-        } 
-        else if (command == "help") 
+        }
+        else if (command == "help")
         {
             handleHelp(args);
-        } 
-        else 
+        }
+        else
         {
             cout << "Unknown command: " << command << endl;
             cout << "Type 'help' for a list of commands." << endl;
         }
-        
-        // Display current directory after each command (except exit)
-        if (running) 
+        if (running)
         {
             explorer.displayCurrentDirectory();
         }
     }
-    
-    bool isRunning() const 
-    { 
-        return running; 
+
+    bool isRunning() const
+    {
+        return running;
     }
 };
 
-int main() 
+int main()
 {
-    // Create file explorer and command handler
+    // for emojis in console
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+
     FileExplorer explorer;
     CommandHandler commandHandler(explorer);
-    
-    // Initialize with some test data
-    explorer.initialize();
-    
-    cout << "===== Virtual File Explorer =====\n";
 
-    // Display initial directory
+    explorer.initialize();
+
+    cout << "===== Virtual File Explorer =====\n";
     explorer.displayCurrentDirectory();
-    
-    // Main command loop
+
     string commandLine;
-    while (commandHandler.isRunning()) 
+    while (commandHandler.isRunning())
     {
+        setConsoleColor(FOREGROUND_GREEN | FOREGROUND_INTENSITY); // Light Green
         cout << explorer.getCurrentPath() << "> ";
+        setConsoleColor(FOREGROUND_RED);
         getline(cin, commandLine);
+        setConsoleColor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
         commandHandler.processCommand(commandLine);
     }
-    
+
     return 0;
 }
