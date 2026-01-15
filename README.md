@@ -1,4 +1,4 @@
-# File-Explorer-OOP-project-2025
+# File-Explorer
 A Virtual File Explorer lets users manage files and folders through a console-based interface like cygwin.
 
 # 🗂️ Virtual File Explorer
